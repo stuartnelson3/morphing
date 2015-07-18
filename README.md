@@ -1,3 +1,3 @@
-This is a website about Mindfulness in organizations.
+# morphing
 
-Copyright Vanessa Beck, 2015.
+drawing what is found in the book morphing by joseph choma
