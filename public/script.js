@@ -1,25 +1,3 @@
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 2000);
-camera.position.z = 800;
-
-SPACING = 100;
-
-var renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
-
-// create the particle variables
-var PARTICLE_COUNT = 50;
-var particles = new THREE.Geometry();
-var pMaterial = new THREE.ParticleBasicMaterial({
-  color: 0xFFA500,
-  size: 2,
-  blending: THREE.AdditiveBlending,
-  transparent: true
-});
-
-scene.add(camera);
-
 pi2 = Math.PI/2;
 pi3 = Math.PI/3;
 pi4 = Math.PI/4;
@@ -28,8 +6,13 @@ cos = Math.cos;
 sin = Math.sin;
 tan = Math.tan;
 
+COLOR = 0xFFA500;
+SPACING = 100;
+CAMERA_DISTANCE = SPACING*5;
+PARTICLE_COUNT = 50;
+
 var sphereParticle = {
-  uLim: Math.PI/12,
+  uLim: Math.PI,
   vLim: Math.PI,
   fn: function(u, v) {
     var pX = sin(v)*cos(u);
@@ -72,19 +55,22 @@ var threeSphereParticle = {
   }
 };
 
-// now create the individual particles
 function generateParticles(n, particleObj) {
   var p = particleObj;
   var a = [];
   var inc = Math.PI / n;
   var i = 0;
+  var l = [];
 
   return function() {
     for (var u = 0; u < p.uLim; u+=inc) {
+      l = [];
+      i = 0;
       for (var v = 0; v < p.vLim; v+=inc) {
-        a[i] = p.fn(u,v);
+        l[i] = p.fn(u,v);
         i++;
       }
+      a.push(l);
     }
     return a;
   };
@@ -95,23 +81,41 @@ var swirl = generateParticles(PARTICLE_COUNT, swirlParticle);
 var twoSphere = generateParticles(PARTICLE_COUNT, twoSphereParticle);
 var threeSphere = generateParticles(PARTICLE_COUNT, threeSphereParticle);
 
-// create the particle system
-var particleSystem = new THREE.ParticleSystem(
-    particles,
-    pMaterial);
-particleSystem.sortParticles = true;
+var renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1500);
+scene = new THREE.Scene();
 
-// add it to the scene
-scene.add(particleSystem);
+var material = new THREE.LineBasicMaterial({
+  color: COLOR
+});
 
-// particles.vertices = sphere();
-// particles.vertices = swirl();
-// particles.vertices = twoSphere();
-particles.vertices = threeSphere();
+// s = swirl();
+s = twoSphere();
+// s = threeSphere();
+// s = sphere();
 
-particleSystem.rotation.y = pi4;
+s.forEach(function(points) {
+  var geometry = new THREE.Geometry();
+  points.forEach(function(p) {
+    geometry.vertices.push(p);
+  });
+  var line = new THREE.Line(geometry, material);
+  scene.add(line);
+});
+
+function cameraOrbit(camera) {
+  var timer = new Date().getTime() * 0.0005;
+
+  camera.position.x = cos( timer ) * CAMERA_DISTANCE;
+  camera.position.z = sin( timer ) * CAMERA_DISTANCE;
+}
+
+angle = 0.01;
 function update() {
-  particleSystem.rotation.y += 0.01;
+  cameraOrbit(camera);
+  camera.lookAt(scene.position);
   renderer.render(scene, camera);
   requestAnimationFrame(update);
 }
