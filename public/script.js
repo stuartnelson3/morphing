@@ -11,6 +11,7 @@ SPACING = 100;
 CAMERA_DISTANCE = SPACING*5;
 DRAW_DISTANCE = 1500;
 PARTICLE_COUNT = 50;
+DRAW_RATE = 30;
 
 var sphereParticle = {
   uLim: 2*Math.PI,
@@ -102,23 +103,32 @@ var material = new THREE.LineBasicMaterial({
 function createScene(scene, shape) {
   // latitudinal curves
   for (var i = 0; i < PARTICLE_COUNT; i++) {
-    var geometry = new THREE.Geometry();
+    setTimeout(function(i) {
+      return function() {
+        var geometry = new THREE.Geometry();
 
-    for (var j = 0; j < shape.length; j++) {
-      geometry.vertices[j] = shape[j][i];
-    }
-    var line = new THREE.Line(geometry, material);
-    scene.add(line);
+        for (var j = 0; j < shape.length; j++) {
+          geometry.vertices[j] = shape[j][i];
+        }
+
+        var line = new THREE.Line(geometry, material);
+        scene.add(line);
+      };
+    }(i), i*DRAW_RATE*2);
   }
 
   // longitudinal curves
   // TODO: merge these into one nested loop
-  shape.forEach(function(s) {
-    var geometry = new THREE.Geometry();
-    geometry.vertices = s;
-    var line = new THREE.Line(geometry, material);
-    scene.add(line);
-  });
+  for (var i = 0; i < shape.length; i++) {
+    setTimeout(function(i) {
+      return function() {
+        var geometry = new THREE.Geometry();
+        geometry.vertices = shape[i];
+        var line = new THREE.Line(geometry, material);
+        scene.add(line);
+      }
+    }(i), i*DRAW_RATE);
+  }
 }
 
 camera.position.x = cos(0) * CAMERA_DISTANCE;
@@ -143,7 +153,7 @@ function removeChildren(scene, cb) {
     }
 
     removeChildren(scene, cb);
-  }, 20);
+  }, DRAW_RATE/2);
 }
 
 var params = {
