@@ -121,13 +121,6 @@ function createScene(scene, shape) {
   });
 }
 
-function cameraOrbit(camera) {
-  var timer = new Date().getTime() * 0.0005;
-
-  camera.position.x = cos( timer ) * CAMERA_DISTANCE;
-  camera.position.z = sin( timer ) * CAMERA_DISTANCE;
-}
-
 camera.position.x = cos(0) * CAMERA_DISTANCE;
 camera.position.z = sin(0) * CAMERA_DISTANCE;
 function update() {
