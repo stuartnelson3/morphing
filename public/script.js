@@ -58,7 +58,7 @@ var threeSphereParticle = {
 function generateParticles(n, particleObj) {
   var p = particleObj;
   var a = [];
-  var inc = Math.PI / n;
+  var inc = p.vLim / n;
   var i = 0;
   var l = [];
 
@@ -92,18 +92,19 @@ var material = new THREE.LineBasicMaterial({
 });
 
 // s = swirl();
-s = twoSphere();
-// s = threeSphere();
+// s = twoSphere();
+s = threeSphere();
 // s = sphere();
 
-s.forEach(function(points) {
+for (var i = 0; i < PARTICLE_COUNT; i++) {
+  var ringIndex = i;
   var geometry = new THREE.Geometry();
-  points.forEach(function(p) {
-    geometry.vertices.push(p);
-  });
+  for (var j = 0; j < s.length; j++) {
+    geometry.vertices[j] = s[j][i];
+  }
   var line = new THREE.Line(geometry, material);
   scene.add(line);
-});
+}
 
 function cameraOrbit(camera) {
   var timer = new Date().getTime() * 0.0005;
@@ -112,7 +113,6 @@ function cameraOrbit(camera) {
   camera.position.z = sin( timer ) * CAMERA_DISTANCE;
 }
 
-angle = 0.01;
 function update() {
   cameraOrbit(camera);
   camera.lookAt(scene.position);
